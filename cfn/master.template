@@ -1,0 +1,106 @@
+{
+   "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "This CloudFormation Master template is responsible for intelligently standing up AWS resources such that dependencies are met.  It will call additional CloudFormation templates to build the VPC, bastion instance, NAT instance, CI instance, PAT instance, and necessary OpsWorks infrastructure.  A CloudFormation template for each AWS resource should be listed with the AWS::CloudFormation::Stack resource type.",
+
+  "Resources" : {
+
+    "IvaVpcStack" : {
+      "Type" : "AWS::CloudFormation::Stack",
+      "Properties" : {
+          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/vpc.template",
+          "Parameters" : {
+            },
+          "TimeoutInMinutes" : "600"
+        }
+      },
+
+    "IvaBastionStack" : {
+      "Type" : "AWS::CloudFormation::Stack",
+      "DependsOn" : "IvaVpcStack",
+      "Properties" : {
+          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/bastion.template",
+          "Parameters" : {
+              "InstanceType" : "m3.medium",
+              "KeyName" : "aws",
+              "VpcId" : { 
+                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]
+              },
+              "IvaPublicSubnetId" : {
+                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]
+              }
+          },
+          "TimeoutInMinutes" : "600"
+      }
+    },
+      
+    "IvaNatStack" : {
+      "Type" : "AWS::CloudFormation::Stack",
+      "DependsOn" : "IvaBastionStack",
+       "Properties" : {
+          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/nat.template",
+          "Parameters" : {
+              "InstanceType" : "m3.medium",
+              "KeyName" : "aws",
+              "VpcId" : { 
+                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]
+              },
+              "IvaPublicSubnetId" : {
+                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]
+              },
+              "IvaPrivateRouteTableId" : {
+                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaRouteTableId" ]
+              },
+              "IvaBastionSecurityGroupId" : {
+                "Fn::GetAtt" : [ "IvaBastionStack", "Outputs.IvaBastionSecurityGroupId" ]
+              }
+          },
+          "TimeoutInMinutes" : "600"
+      }
+    },
+      
+    "IvaJenkinsStack" : {
+      "Type" : "AWS::CloudFormation::Stack",
+      "DependsOn" : "IvaBastionStack",
+      "Properties" : {
+          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/ci-chef.template",
+          "Parameters" : {
+              "InstanceType" : "m3.medium",
+              "KeyName" : "aws",
+              "VpcId" : { 
+                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]
+              },
+              "IvaPublicSubnetId" : {
+                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]
+              },
+              "IvaBastionSecurityGroupId" : {
+                "Fn::GetAtt" : [ "IvaBastionStack", "Outputs.IvaBastionSecurityGroupId" ]
+              }
+          },
+          "TimeoutInMinutes" : "600"
+      }
+    },
+
+    "IvaWebStack" : {
+      "Type" : "AWS::CloudFormation::Stack",
+      "DependsOn" : "IvaBastionStack",
+      "Properties" : {
+          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/web.template",
+          "Parameters" : {
+              "InstanceType" : "m3.medium",
+              "KeyName" : "aws",
+              "VpcId" : { 
+                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]
+              },
+              "IvaPublicSubnetId" : {
+                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]
+              },
+              "IvaBastionSecurityGroupId" : {
+                "Fn::GetAtt" : [ "IvaBastionStack", "Outputs.IvaBastionSecurityGroupId" ]
+              }
+          },
+          "TimeoutInMinutes" : "600"
+      }
+    }
+  }   
+}

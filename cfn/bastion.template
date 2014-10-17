@@ -1,0 +1,145 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  
+  "Description" : "This CloudFormation template will create a bastion host inside the public subnet of an already-created VPC. This host will control SSH traffic to other servers inside the VPC.",
+
+"Parameters" : {
+  
+    "InstanceType" : {
+        "Description" : "Enter t2.micro, m1.small, m3.medium, or c1.medium (for high CPU). Default is t2.micro.",
+        "Type" : "String",
+        "Default" : "t2.micro",
+        "AllowedValues" : [ "t2.micro","m1.small","m3.medium","m1.large" ],
+        "ConstraintDescription" : "Must be a valid EC2 instance type."
+    },
+
+    "IvaPublicSubnetId" : {
+        "Description" : "This parameter will pull in the Public Subnet ID returned from vpc.template.",
+        "Type" : "String"
+    },    
+
+    "KeyName" : {
+        "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+        "Default" : "aws",
+        "Type" : "String",
+        "MinLength" : "1",
+        "MaxLength" : "255",
+        "AllowedPattern" : "[\\x20-\\x7E]*",
+        "ConstraintDescription" : "can contain only ASCII characters."
+    },
+
+    "VpcId" : {
+        "Description" : "This parameter will pull in the VPC ID returned from vpc.template.",
+        "Type" : "String"
+    }
+  },
+
+  "Resources" : {
+    "IvaBastion" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "DisableApiTermination" : "FALSE",
+        "ImageId" : "ami-08842d60",
+        "InstanceType" : {
+          "Ref" : "InstanceType"
+        },
+        "KeyName" : {
+          "Ref" : "KeyName"
+        },
+        "Monitoring" : "false",
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : "InnovateVA Bastion"
+          },
+          {
+            "Key" : "Description",
+            "Value" : "This instance is a bastion host, used for SSH access to all other IVA servers."
+          }
+        ],
+        "NetworkInterfaces" : [
+          {
+            "DeleteOnTermination" : "true",
+            "Description" : "Network interface for bastion host",
+            "DeviceIndex" : 0,
+            "SubnetId" : {
+              "Ref" : "IvaPublicSubnetId"
+            },
+            "PrivateIpAddresses" : [
+              {
+                "PrivateIpAddress" : "10.8.1.250",
+                "Primary" : "true"
+              }
+            ],
+            "GroupSet" : [
+              {
+                "Ref" : "IvaBastionSecurityGroup"
+              }
+            ],
+            "AssociatePublicIpAddress" : "true"
+          }
+        ]
+      }
+    },
+
+    "IvaBastionSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Security Group for Bastion Server, allows inbound SSH access from SingleStone Office.  Allows outbound SSH traffic to IvaPublicSubnet and IvaPrivateSubnet.",
+        "VpcId" : { 
+          "Ref" : "VpcId" 
+        },
+        "SecurityGroupIngress" : [
+          {
+            "IpProtocol" : "tcp",
+            "FromPort" : "22",
+            "ToPort" : "22",
+            "CidrIp" : "0.0.0.0/0"
+          }
+        ],
+        "SecurityGroupEgress" : [
+          {
+            "IpProtocol" : "tcp",
+            "FromPort" : "22",
+            "ToPort" : "22",
+            "CidrIp" : "10.8.1.0/24"
+          },
+          {
+            "IpProtocol" : "tcp",
+            "FromPort" : "22",
+            "ToPort" : "22",
+            "CidrIp" : "10.8.2.0/24"
+          },
+          {
+            "IpProtocol" : "tcp",
+            "FromPort" : "80",
+            "ToPort" : "80",
+            "CidrIp" : "0.0.0.0/0"
+          },
+          {
+            "IpProtocol" : "tcp",
+            "FromPort" : "443",
+            "ToPort" : "443",
+            "CidrIp" : "0.0.0.0/0"
+          }
+        ]
+      }
+    }
+  },
+
+  "Outputs" : {
+    "IvaBastionPublicIp" : {
+      "Description" : "This is the publicly addressable IP address returned from the AWS::EC2::Instance class.  Your local .ssh config file will need the new public IP in order to access the InnovateVA servers.",
+      "Value" : {
+        "Ref" : "IvaBastion"
+      }
+    },    
+    
+    "IvaBastionSecurityGroupId" : {
+      "Description" : "This is the ID of the Bastion Security Group returned from the AWS::EC2::SecurityGroup class, which will be passed into the security groups of other servers to allow SSH access only from the Bastion.",
+      "Value" : {
+        "Ref" : "IvaBastionSecurityGroup"
+      }
+    }
+  }
+}

@@ -1,0 +1,254 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  
+  "Description" : "This template will create the base VPC.  Does not include creation of any instances or custom security groups/network ACLs. One route will be added to the Private Route Table by nat.template.",
+
+  "Resources" : {
+    "IvaVpc" : {
+      "Type" : "AWS::EC2::VPC",
+      "Properties" : {
+        "CidrBlock" : "10.8.0.0/16",
+        "InstanceTenancy" : "default",
+        "EnableDnsSupport" : "true",
+        "EnableDnsHostnames" : "true",
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : "InnovateVA VPC"
+          }
+        ]
+      }
+    },
+    
+    "IvaPrivateSubnet" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "CidrBlock" : "10.8.2.0/24",
+        "AvailabilityZone" : "us-east-1d",
+        "VpcId" : {
+          "Ref" : "IvaVpc"
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : "InnovateVA Private Subnet"
+          }
+        ]
+      }
+    },
+    
+    "IvaPublicSubnet" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "CidrBlock" : "10.8.1.0/24",
+        "AvailabilityZone" : "us-east-1d",
+        "VpcId" : {
+          "Ref" : "IvaVpc"
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : "InnovateVA Public Subnet"
+          }
+        ]
+      }
+    },
+    
+    "IvaInternetGateway" : {
+      "Type" : "AWS::EC2::InternetGateway",
+      "Properties" : {
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : "InnovateVA VPC Gateway"
+          }
+        ]
+      }
+    },
+    
+    "IvaDhcpOptions" : {
+      "Type" : "AWS::EC2::DHCPOptions",
+      "Properties" : {
+        "DomainNameServers" : [
+          "AmazonProvidedDNS"
+        ]
+      }
+    },
+    
+    "IvaDefaultNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : {
+          "Ref" : "IvaVpc"
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : "InnovateVA Default Network ACL"
+          }
+        ]
+      }
+    },
+    
+    "IvaPublicRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : {
+          "Ref" : "IvaVpc"
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : "InnovateVA Public Route Table"
+          }
+        ]
+      }
+    },
+    
+    "IvaPrivateRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : {
+          "Ref" : "IvaVpc"
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : "InnovateVA Private Route Table"
+          }
+        ]
+      }
+    },
+    
+    "IvaDefaultOutboundNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "CidrBlock" : "0.0.0.0/0",
+        "Egress" : true,
+        "Protocol" : "-1",
+        "RuleAction" : "allow",
+        "RuleNumber" : "100",
+        "NetworkAclId" : {
+          "Ref" : "IvaDefaultNetworkAcl"
+        }
+      }
+    },
+    
+    "IvaDefaultInboundNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "CidrBlock" : "0.0.0.0/0",
+        "Protocol" : "-1",
+        "RuleAction" : "allow",
+        "RuleNumber" : "100",
+        "NetworkAclId" : {
+          "Ref" : "IvaDefaultNetworkAcl"
+        }
+      }
+    },
+    
+    "IvaPrivateSubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "NetworkAclId" : {
+          "Ref" : "IvaDefaultNetworkAcl"
+        },
+        "SubnetId" : {
+          "Ref" : "IvaPrivateSubnet"
+        }
+      }
+    },
+    
+    "IvaPublicSubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "NetworkAclId" : {
+          "Ref" : "IvaDefaultNetworkAcl"
+        },
+        "SubnetId" : {
+          "Ref" : "IvaPublicSubnet"
+        }
+      }
+    },
+    
+    "IvaVpcGatewayAttachment" : {
+      "Type" : "AWS::EC2::VPCGatewayAttachment",
+      "Properties" : {
+        "VpcId" : {
+          "Ref" : "IvaVpc"
+        },
+        "InternetGatewayId" : {
+          "Ref" : "IvaInternetGateway"
+        }
+      }
+    },
+    
+    "IvaPublicSubnetRouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "RouteTableId" : {
+          "Ref" : "IvaPublicRouteTable"
+        },
+        "SubnetId" : {
+          "Ref" : "IvaPublicSubnet"
+        }
+      }
+    },
+    
+    "IvaPublicRoute1" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "IvaVpcGatewayAttachment",
+      "Properties" : {
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "RouteTableId" : {
+          "Ref" : "IvaPublicRouteTable"
+        },
+        "GatewayId" : {
+          "Ref" : "IvaInternetGateway"
+        }
+      }
+    },
+    
+    "IvaDhcpAssociation" : {
+      "Type" : "AWS::EC2::VPCDHCPOptionsAssociation",
+      "Properties" : {
+        "VpcId" : {
+          "Ref" : "IvaVpc"
+        },
+        "DhcpOptionsId" : {
+          "Ref" : "IvaDhcpOptions"
+        }
+      }
+    }
+  },
+
+  "Outputs" : {
+    "VpcId" : {
+      "Description" : "This is the ID of the VPC for use in other templates.",
+      "Value" : { 
+        "Ref" : "IvaVpc" 
+      }
+    },
+    
+    "IvaPrivateSubnetId" : {
+      "Description" : "This is the ID of the private subnet for use in other templates.",
+      "Value" : {
+        "Ref" : "IvaPrivateSubnet"
+      }
+    },
+    
+    "IvaPublicSubnetId" : {
+      "Description" : "This is the ID of the public subnet for use in other templates.",
+      "Value" : {
+        "Ref" : "IvaPublicSubnet"
+      }
+    },
+    
+    "IvaRouteTableId" : {
+      "Description" : "This is the ID of the private Route Table.  The nat.template needs this ID to add a route entry to the private Route Table.",      
+      "Value" : {
+        "Ref" : "IvaPrivateRouteTable"
+      }
+    }
+  }
+}

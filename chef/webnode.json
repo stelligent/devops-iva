@@ -1,0 +1,6 @@
+{ "run_list" : [
+		"recipe[apache2]",
+		"recipe[openssl]",
+		"recipe[tomcat]",
+		"recipe[newrelic]"
+]}
