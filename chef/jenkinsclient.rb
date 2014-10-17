@@ -4,7 +4,7 @@ node_name				"InnovateVaJenkins"
 log_level				:debug
 log_location			'/opt/chef/chef-client.log'
 ssl_verify_mode			:verify_none
-chef_server_url			"https://chefserver.ddigtest.com/organizations/ssc"
+chef_server_url			"https://chefserver.singlestonedemo.com/organizations/ssc"
 validation_client_name	"ssc-validator"
 validation_key			"/opt/chef/validator.pem"
 client_key				"/opt/chef/client.pem"

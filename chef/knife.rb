@@ -7,7 +7,7 @@ node_name                "dtashner"
 client_key               "/Users/davetashner/Documents/InnovateVA/chef/dtashner.pem"
 validation_client_name   "ssc-validator"
 validation_key           "/Users/davetashner/Documents/InnovateVA/chef/validator.pem"
-chef_server_url          "https://chefserver.ddigtest.com/organizations/ssc"
+chef_server_url          "https://chefserver.singlestonedemo.com/organizations/ssc"
 cache_type               'BasicFile'
 cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
-cookbook_path            [ '/Users/davetashner/Documents/InnovateVA/chef/' ]
+cookbook_path            [ '/Users/davetashner/Documents/InnovateVA/chef/cookbooks' ]

@@ -35,3 +35,5 @@ rescue Chef::Exceptions::RecipeNotFound
     "this cookbook. Please ensure you have spelled it correctly. If you " \
     "continue to encounter this error, please file an issue."
 end
+
+jenkins_plugin 'git'

@@ -57,6 +57,11 @@ if platform_family?('rhel', 'fedora', 'arch', 'suse', 'freebsd')
     group  node['apache']['root_group']
   end
 
+  cookbook_file '/var/www/html/index.html' do
+    source 'index.html'
+    mode '0644'
+  end
+
   %w[sites-available sites-enabled mods-available mods-enabled].each do |dir|
     directory "#{node['apache']['dir']}/#{dir}" do
       mode  '0755'

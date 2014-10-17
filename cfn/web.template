@@ -19,11 +19,6 @@
         "ConstraintDescription" : "Must be a valid EC2 instance type."
     },     
 
-    "IvaBastionSecurityGroupId" : {
-        "Description" : "This parameter will pull in the Bastion Security Group ID returned from bastion.template.",
-        "Type" : "String"
-    },
-
     "IvaPublicSubnetId" : {
         "Description" : "This parameter will pull in the Public Subnet ID returned from vpc.template.",
         "Type" : "String"
@@ -66,7 +61,7 @@
   },
 
   "Resources" : {
-    "IvaWebInstance" : {
+    "IvaAppInstance" : {
       "Type" : "AWS::EC2::Instance",
         "Properties" : {
         "DisableApiTermination" : "FALSE",
@@ -83,11 +78,11 @@
         "Tags" : [
           {
             "Key" : "Name",
-            "Value" : "InnovateVA Web Server"
+            "Value" : "InnovateVA App Server"
           },
           {
             "Key" : "Description",
-            "Value" : "Contains Web server. Test must be accessible on 443 to restricted IPs."
+            "Value" : "Contains App server with Apache/Tomcat. Test must be accessible on 443 to restricted IPs."
           }
         ],
         "NetworkInterfaces" : [
@@ -106,7 +101,7 @@
             ],
             "GroupSet" : [
               {
-                "Ref" : "IvaWebSecurityGroup"
+                "Ref" : "IvaAppSecurityGroup"
               }
             ],
             "AssociatePublicIpAddress" : "true"
@@ -117,7 +112,7 @@
         "wget -O /tmp/hostname.sh           https://s3.amazonaws.com/singlestone/chef/hostname.sh\n",
         "bash /tmp/hostname.sh\n",
         "mkdir /var/log/newrelic\n",
-        "hostname InnovateVaWeb\n",
+        "hostname IVAApp\n",
         "cd /tmp/\n",
         "mkdir /opt\n",
         "cd /opt\n",
@@ -128,7 +123,7 @@
         "wget -O /opt/chef/client.rb        https://s3.amazonaws.com/singlestone/chef/webclient.rb\n",
         "wget -O /opt/chef/validator.pem    https://s3.amazonaws.com/singlestone/chef/validator.pem\n",
         "wget -O /opt/chef/node.json        https://s3.amazonaws.com/singlestone/chef/webnode.json\n",
-        "export HOSTNAME=`/usr/bin/curl -s http://169.254.169.254/latest/meta-data/local-ipv4`\n",
+        "export HOSTNAME=`/usr/bin/curl -s http://169.254.169.254/latest/meta-data/local-hostname`\n",
 
         "chef-client -c /opt/chef/client.rb\n",
         "touch /root/chef-complete"
@@ -136,14 +131,34 @@
       }
     },
 
-    "IvaWebSecurityGroup" : {
+    "IvaAppDNS" : {
+      "Type" : "AWS::Route53::RecordSet",
+      "Properties" : {
+        "Comment" : "Sets hostname for IvaApp.",
+        "HostedZoneName" : "singlestonedemo.com.",
+        "Name" : "singlestonedemo.com.",
+        "ResourceRecords" : [
+            { "Fn::GetAtt" : [ "IvaAppInstance", "PublicIp" ] }
+         ],
+        "TTL" : "60",
+        "Type" : "A"
+      }
+    },
+
+    "IvaAppSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
-        "GroupDescription" : "Defines security for InnovateVA web server.  Allows ports 80 and 443 open to SSC office.",
+        "GroupDescription" : "Defines security for InnovateVA app server.  Allows ports 80 and 443 open to SSC office.",
         "VpcId" : {
           "Ref" : "VpcId"
         },
         "SecurityGroupIngress" : [
+          {
+            "IpProtocol" : "tcp",
+            "FromPort" : "22",
+            "ToPort" : "22",
+            "CidrIp" : "0.0.0.0/0"
+          },
           {
             "IpProtocol" : "tcp",
             "FromPort" : "80",
@@ -178,22 +193,6 @@
           }
         ]
       }
-    },
-    
-    "SshFromBastion" : {
-      "Type" : "AWS::EC2::SecurityGroupIngress",
-      "Properties" : {
-        "GroupId" : {
-          "Ref" : "IvaWebSecurityGroup"
-        },
-        "IpProtocol" : "tcp",
-        "FromPort" : "22",
-        "ToPort" : "22",
-        "SourceSecurityGroupId" : {
-          "Ref" : "IvaBastionSecurityGroupId"
-        },
-        "SourceSecurityGroupOwnerId" : "592342700041"
-      }
     }
   },
 
@@ -201,14 +200,14 @@
     "InstanceId" : {
       "Description" : "This is the instance ID of the InnovateVA web server.",
       "Value" : { 
-        "Ref" : "IvaWebInstance"
+        "Ref" : "IvaAppInstance"
         }
     },
 
     "PublicIp" : {
       "Description" : "This is the publicly addressable IP address assigned to the InnovateVA web server.  Will need this for Route53.",
       "Value" : {
-        "Ref" : "IvaWebInstance"
+        "Ref" : "IvaAppInstance"
       }
     }
   }
