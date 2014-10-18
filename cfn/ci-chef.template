@@ -19,11 +19,6 @@
         "ConstraintDescription" : "Must be a valid EC2 instance type."
     },
 
-    "IvaBastionSecurityGroupId" : {
-        "Description" : "This parameter will pull in the Bastion Security Group ID returned from bastion.template.",
-        "Type" : "String"
-    },
-
     "IvaPublicSubnetId" : {
         "Description" : "This parameter will pull in the Public Subnet ID returned from vpc.template.",
         "Type" : "String"
@@ -73,7 +68,7 @@
           },
           {
             "Key" : "Description",
-            "Value" : "Contains Jenkins. Test must be accessible on 443 to restricted IPs."
+            "Value" : "Contains Jenkins running on port 8080."
           }
         ],
         "NetworkInterfaces" : [
@@ -114,11 +109,25 @@
         "wget -O /opt/chef/client.rb        https://s3.amazonaws.com/singlestone/chef/jenkinsclient.rb\n",
         "wget -O /opt/chef/validator.pem    https://s3.amazonaws.com/singlestone/chef/validator.pem\n",
         "wget -O /opt/chef/node.json        https://s3.amazonaws.com/singlestone/chef/cinode.json\n",
-        "export HOSTNAME=`/usr/bin/curl -s http://169.254.169.254/latest/meta-data/local-ipv4`\n",
+        "export HOSTNAME=`/usr/bin/curl -s http://169.254.169.254/latest/meta-data/local-hostname`\n",
 
         "chef-client -c /opt/chef/client.rb\n",
         "touch /root/chef-complete"
         ]]}}
+      }
+    },
+
+    "IvaJenkinsDNS" : {
+      "Type" : "AWS::Route53::RecordSet",
+      "Properties" : {
+        "Comment" : "Sets hostname for IvaJenkins.",
+        "HostedZoneName" : "singlestonedemo.com.",
+        "Name" : "jenkins.singlestonedemo.com.",
+        "ResourceRecords" : [
+            { "Fn::GetAtt" : [ "IvaCi", "PublicIp" ] }
+         ],
+        "TTL" : "60",
+        "Type" : "A"
       }
     },
 
@@ -129,18 +138,24 @@
         "VpcId" : {
           "Ref" : "VpcId"
         },
-        "SecurityGroupIngress" : [        
+        "SecurityGroupIngress" : [   
+          {
+            "IpProtocol" : "tcp",
+            "FromPort" : "22",
+            "ToPort" : "22",
+            "CidrIp" : "0.0.0.0/0"
+          },     
           {
             "IpProtocol" : "tcp",
             "FromPort" : "80",
             "ToPort" : "80",
-            "CidrIp" : "72.84.250.138/32"
+            "CidrIp" : "0.0.0.0/0"
           },
           {
             "IpProtocol" : "tcp",
             "FromPort" : "443",
             "ToPort" : "443",
-            "CidrIp" : "72.84.250.138/32"
+            "CidrIp" : "0.0.0.0/0"
           },
           {
             "IpProtocol" : "tcp",
@@ -176,22 +191,6 @@
             "CidrIp" : "0.0.0.0/0"
           }
         ]
-      }
-    },
-
-    "sshFromBastion" : {
-      "Type" : "AWS::EC2::SecurityGroupIngress",
-      "Properties" : {
-        "GroupId" : {
-          "Ref" : "IvaCiSecurityGroup"
-        },
-        "IpProtocol" : "tcp",
-        "FromPort" : "22",
-        "ToPort" : "22",
-        "SourceSecurityGroupId" : { "Ref" : "IvaBastionSecurityGroupId" },
-        "SourceSecurityGroupOwnerId" : { 
-          "Ref" : "SourceSecurityGroupOwnerId"
-          }
       }
     }
   },

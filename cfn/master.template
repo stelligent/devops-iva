@@ -14,54 +14,10 @@
           "TimeoutInMinutes" : "600"
         }
       },
-
-    "IvaBastionStack" : {
-      "Type" : "AWS::CloudFormation::Stack",
-      "DependsOn" : "IvaVpcStack",
-      "Properties" : {
-          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/bastion.template",
-          "Parameters" : {
-              "InstanceType" : "m3.medium",
-              "KeyName" : "aws",
-              "VpcId" : { 
-                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]
-              },
-              "IvaPublicSubnetId" : {
-                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]
-              }
-          },
-          "TimeoutInMinutes" : "600"
-      }
-    },
-      
-    "IvaNatStack" : {
-      "Type" : "AWS::CloudFormation::Stack",
-      "DependsOn" : "IvaBastionStack",
-       "Properties" : {
-          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/nat.template",
-          "Parameters" : {
-              "InstanceType" : "m3.medium",
-              "KeyName" : "aws",
-              "VpcId" : { 
-                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]
-              },
-              "IvaPublicSubnetId" : {
-                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]
-              },
-              "IvaPrivateRouteTableId" : {
-                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaRouteTableId" ]
-              },
-              "IvaBastionSecurityGroupId" : {
-                "Fn::GetAtt" : [ "IvaBastionStack", "Outputs.IvaBastionSecurityGroupId" ]
-              }
-          },
-          "TimeoutInMinutes" : "600"
-      }
-    },
       
     "IvaJenkinsStack" : {
       "Type" : "AWS::CloudFormation::Stack",
-      "DependsOn" : "IvaBastionStack",
+      "DependsOn" : "IvaVpcStack",
       "Properties" : {
           "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/ci-chef.template",
           "Parameters" : {
@@ -72,9 +28,6 @@
               },
               "IvaPublicSubnetId" : {
                 "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]
-              },
-              "IvaBastionSecurityGroupId" : {
-                "Fn::GetAtt" : [ "IvaBastionStack", "Outputs.IvaBastionSecurityGroupId" ]
               }
           },
           "TimeoutInMinutes" : "600"
@@ -83,7 +36,7 @@
 
     "IvaWebStack" : {
       "Type" : "AWS::CloudFormation::Stack",
-      "DependsOn" : "IvaBastionStack",
+      "Description" : "Brings up an Amazon Linux application server with Apache and Tomcat.",
       "Properties" : {
           "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/web.template",
           "Parameters" : {
@@ -94,9 +47,6 @@
               },
               "IvaPublicSubnetId" : {
                 "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]
-              },
-              "IvaBastionSecurityGroupId" : {
-                "Fn::GetAtt" : [ "IvaBastionStack", "Outputs.IvaBastionSecurityGroupId" ]
               }
           },
           "TimeoutInMinutes" : "600"
