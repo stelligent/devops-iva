@@ -19,7 +19,7 @@
       "Type" : "AWS::CloudFormation::Stack",
       "DependsOn" : "IvaVpcStack",
       "Properties" : {
-          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/ci-chef.template",
+          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/jenkins.template",
           "Parameters" : {
               "InstanceType" : "m3.medium",
               "KeyName" : "aws",

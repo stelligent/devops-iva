@@ -117,7 +117,7 @@
         "mkdir /opt\n",
         "cd /opt\n",
         "mkdir chef\n",
-        "wget -O /tmp/chef-client.rpm       https://s3.amazonaws.com/singlestone/chef/chefdk-0.3.0-1.x86_64.rpm\n",
+        "wget -O /tmp/chef-client.rpm       https://s3.amazonaws.com/singlestone/binaries/chefdk-0.3.0-1.x86_64.rpm\n",
         "rpm -Uvh /tmp/chef-client.rpm\n",
 
         "wget -O /opt/chef/client.rb        https://s3.amazonaws.com/singlestone/chef/webclient.rb\n",
@@ -145,6 +145,14 @@
       }
     },
 
+    "IvaSelfieS3Bucket" : {
+      "Type" : "AWS::S3::Bucket",
+      "Properties" : {
+         "AccessControl" : "PublicReadWrite",
+         "BucketName" : "selfie-bucket"
+      }
+   },
+
     "IvaAppSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
@@ -169,6 +177,12 @@
             "IpProtocol" : "tcp",
             "FromPort" : "443",
             "ToPort" : "443",
+            "CidrIp" : "0.0.0.0/0"
+          },
+          {
+            "IpProtocol" : "tcp",
+            "FromPort" : "8080",
+            "ToPort" : "8080",
             "CidrIp" : "0.0.0.0/0"
           }
         ],
@@ -207,7 +221,7 @@
     "PublicIp" : {
       "Description" : "This is the publicly addressable IP address assigned to the InnovateVA web server.  Will need this for Route53.",
       "Value" : {
-        "Ref" : "IvaAppInstance"
+        "Fn::GetAtt": [ "IvaAppInstance", "PublicIp" ]
       }
     }
   }
