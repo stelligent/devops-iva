@@ -5,20 +5,23 @@ import com.twilio.sdk.TwilioRestException;
 import com.twilio.sdk.verbs.Sms;
 import com.twilio.sdk.verbs.TwiMLException;
 import com.twilio.sdk.verbs.TwiMLResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 
 @Service
 public class TwilioSmsService implements SmsService {
-    private static final String SID = "AC203eee847735dbdcd1a70461ef323052";
-    private static final String AUTH_TOKEN = "631e0b6354889bea892f9376255b824e";
+    private static final Logger LOGGER = LoggerFactory.getLogger(TwilioSmsService.class);
     private static final String FROM = "+18046328573";
 
     private final TwilioRestClient twilio;
 
-    public TwilioSmsService() {
-        this.twilio = new TwilioRestClient(SID, AUTH_TOKEN);
+    @Autowired
+    public TwilioSmsService(TwilioCredentials twilioCredentials) {
+        this.twilio = new TwilioRestClient(twilioCredentials.getSid(), twilioCredentials.getAuthToken());
     }
 
     @Override
@@ -31,7 +34,7 @@ public class TwilioSmsService implements SmsService {
         try {
             twilio.getAccount().getSmsFactory().create(params);
         } catch (TwilioRestException e) {
-            // TODO Log exception
+            LOGGER.error("Failed to send SMS.", e);
             throw new RuntimeException(e);
         }
     }
@@ -42,8 +45,8 @@ public class TwilioSmsService implements SmsService {
         try {
             twiml.append(new Sms(message));
         } catch (TwiMLException e) {
-            // TODO Log exception
-            throw new IllegalStateException(e);
+            LOGGER.error("Failed to construct response.", e);
+            throw new RuntimeException(e);
         }
         return twiml.toXML();
     }

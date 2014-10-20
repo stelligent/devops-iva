@@ -1,6 +1,6 @@
 package com.singlestoneconsulting.participant;
 
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
@@ -11,13 +11,10 @@ import java.util.Set;
 
 @Repository
 public class DynamoDBParticipantRepository implements ParticipantRepository {
-    private static final String ACCESS_KEY = "AKIAIZXP42ONWF4U7LXA";
-    private static final String SECRET_KEY = "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";
-
     private final DynamoDBMapper dynamoDB;
 
     public DynamoDBParticipantRepository() {
-        AmazonDynamoDBClient client = new AmazonDynamoDBClient(new BasicAWSCredentials(ACCESS_KEY, SECRET_KEY));
+        AmazonDynamoDBClient client = new AmazonDynamoDBClient(new DefaultAWSCredentialsProviderChain());
         dynamoDB = new DynamoDBMapper(client);
     }
 
