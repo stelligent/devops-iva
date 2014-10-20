@@ -35,7 +35,7 @@ public class TwilioSmsService implements SmsService {
             twilio.getAccount().getSmsFactory().create(params);
         } catch (TwilioRestException e) {
             LOGGER.error("Failed to send SMS.", e);
-            throw new RuntimeException(e);
+//            throw new RuntimeException(e);
         }
     }
 

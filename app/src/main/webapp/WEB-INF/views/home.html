@@ -1,39 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="devops" ng-controller="AppCtrl as appCtrl">
 <head>
-    <title>DevOps DeMystified</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <link href="../../resources/css/bootstrap.min.css" rel="stylesheet" media="screen" th:href="@{/resources/css/bootstrap.min.css}"/>
-    <link href="../../resources/css/core.css" rel="stylesheet" media="screen" th:href="@{/resources/css/core.css}" />
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
-    <script src="../../resources/js/bootstrap.min.js" th:src="@{/resources/js/bootstrap.min.js}"></script>
+  <title>DevOps DeMystified</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="../../resources/css/bootstrap.css" rel="stylesheet" media="screen" th:href="@{/resources/css/bootstrap.css}"/>
+  <link href="../../resources/css/app.css" rel="stylesheet" media="screen" th:href="@{/resources/css/app.css}"/>
 </head>
 <body>
-<div class="navbar navbar-inverse navbar-fixed-top">
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">Logo</a>
+      </div>
+    </div>
+  </nav>
   <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="#">DevOps DeMystified</a>
+    <header class="jumbotron hero-spacer">
+      <h1>DevOps DeMystified</h1>
+      <p>Text your first name or initials to 804-632-8573 to play along.</p>
+    </header>
+
+    <hr/>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <h3>Attendees</h3>
+      </div>
     </div>
-    <div class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="#" th:href="@{/}">Home</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
+
+    <div class="row text-center" ng-repeat="(rowNum, participants) in appCtrl.participantRows">
+      <div class="col-md-3 col-sm-6 hero-feature" ng-repeat="participant in participants">
+        <div class="thumbnail">
+          <img src="http://placehold.it/800x500" alt=""/>
+          <div class="caption">
+            <h3>{{ participant.name }}</h3>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <hr/>
+
+    <!-- Footer -->
+    <footer>
+      <div class="row">
+        <div class="col-lg-12">
+          <p>Copyright &copy; SingleStone Consulting 2014</p>
+        </div>
+      </div>
+    </footer>
   </div>
-</div>
-<div class="container">
-  <div class="text-center">
-    <h1>DevOps DeMystified</h1>
-    <p class="lead">Catchy lead!</p>
-  </div>
-  <div>&copy; 2014 SingleStone Consulting</div>
-</div>
+  <script src="../../resources/js/angular.js" th:src="@{/resources/js/angular.js}"></script>
+  <script src="../../resources/js/angular-route.js" th:src="@{/resources/js/angular-route.js}"></script>
+  <script src="../../resources/js/lodash.js" th:src="@{/resources/js/lodash.js}"></script>
+  <script src="../../resources/js/app.js" th:src="@{/resources/js/app.js}"></script>
 </body>
 </html>
