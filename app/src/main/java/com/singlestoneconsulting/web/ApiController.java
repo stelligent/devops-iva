@@ -23,6 +23,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RequestMapping("/api")
 public class ApiController {
 
+    private static final String MSG_REPLY = "Thanks %s! Check it out: %s";
+    private static final String MSG_DEPLOY = "Hey %s, check out the new version: %s";
+    private static final String URL = "http://singlestonedemo.com:8080/devops-iva/";
+
     private final ParticipantRepository participantRepository;
     private final SmsService smsService;
 
@@ -55,13 +59,13 @@ public class ApiController {
 
         participantRepository.save(participant);
 
-        return sendXml(smsService.getResponse("Got it! Thanks " + participant.getName()));
+        return sendXml(smsService.getResponse(String.format(MSG_REPLY, participant.getName(), URL)));
     }
 
     @PostConstruct
     public void postConstruct() {
         for (Participant p : participantRepository.all()) {
-            smsService.sendText(p.getPhoneNumber(), "Hi " + p.getName() + ", check out the new version.");
+            smsService.sendText(p.getPhoneNumber(), String.format(MSG_DEPLOY, p.getName(), URL));
         }
     }
 
