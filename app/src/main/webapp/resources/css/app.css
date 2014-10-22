@@ -13,3 +13,8 @@ body {
 footer {
     margin: 50px 0;
 }
+
+.navbar {
+    background-color: #FFF;
+    border-color: #FFF;
+}
