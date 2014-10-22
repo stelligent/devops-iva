@@ -3,6 +3,7 @@ package com.singlestoneconsulting.web;
 import com.singlestoneconsulting.participant.Participant;
 import com.singlestoneconsulting.participant.ParticipantRepository;
 import com.singlestoneconsulting.sms.SmsService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -50,12 +51,21 @@ public class ApiController {
     }
 
     @RequestMapping(value = "/twilio", method = RequestMethod.POST)
-    public ResponseEntity<String> register(@RequestParam("From") String from, @RequestParam("Body") String body) {
+    public ResponseEntity<String> register(@RequestParam("From") String from,
+                                           @RequestParam("Body") String body,
+                                           @RequestParam("MediaUrl") String selfieUrl,
+                                           @RequestParam("MediaUrl1") String selfieUrl1) {
         Participant participant = participantRepository.get(from);
         if (participant == null) {
             participant = new Participant(from);
         }
-        participant.setName(body);
+
+        String name = StringUtils.isNotBlank(body) ? body
+                    : StringUtils.isNotBlank(participant.getName()) ? participant.getName()
+                    : body;
+        participant.setName(name);
+
+        participant.setSelfieUrl(StringUtils.isBlank(selfieUrl) ? selfieUrl1 : selfieUrl);
 
         participantRepository.save(participant);
 
