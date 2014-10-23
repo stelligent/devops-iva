@@ -26,7 +26,7 @@ public class ApiController {
 
     private static final String MSG_REPLY = "Thanks %s! Check it out: %s";
     private static final String MSG_DEPLOY = "Hey %s, check out the new version: %s";
-    private static final String URL = "http://singlestonedemo.com:8080/devops-iva/";
+    private static final String URL = "http://singlestonedemo.com";
 
     private final ParticipantRepository participantRepository;
     private final SmsService smsService;
