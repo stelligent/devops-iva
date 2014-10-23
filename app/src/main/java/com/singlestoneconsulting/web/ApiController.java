@@ -52,8 +52,8 @@ public class ApiController {
 
     @RequestMapping(value = "/twilio", method = RequestMethod.POST)
     public ResponseEntity<String> register(@RequestParam("From") String from,
-                                           @RequestParam("Body") String body,
-                                           @RequestParam("MediaUrl0") String selfieUrl) {
+                                           @RequestParam(value = "Body", required = false) String body,
+                                           @RequestParam(value = "MediaUrl0", required = false) String selfieUrl) {
         Participant participant = participantRepository.get(from);
         if (participant == null) {
             participant = new Participant(from);
