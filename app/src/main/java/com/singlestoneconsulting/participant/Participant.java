@@ -17,6 +17,9 @@ public class Participant {
     @DynamoDBAttribute(attributeName="Registered")
     private Date registered;
 
+    @DynamoDBAttribute(attributeName="SelfieUrl")
+    private String selfieUrl;
+
     public Participant() {
     }
 
@@ -47,6 +50,14 @@ public class Participant {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSelfieUrl() {
+        return selfieUrl;
+    }
+
+    public void setSelfieUrl(String selfieUrl) {
+        this.selfieUrl = selfieUrl;
     }
 
     @Override
