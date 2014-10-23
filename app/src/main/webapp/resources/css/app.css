@@ -44,8 +44,11 @@ footer {
 .thumbnail{
     background:transparent;
     border: none;
+    margin-bottom:0;
 }
-.thumbnail img {
+.thumbnail .container {overflow: hidden;padding:15px;}
+.thumbnail .caption {padding:0}
+.thumbnail img {width:100%;
     border-radius: 50%;
     background-color: #fff;
     box-shadow: 0 0 25px rgba(93,79,49,0.15);
@@ -62,14 +65,19 @@ footer p {font-size: 0.7em;margin-top: 10px}
 
 #SingleStoneLogo {width:150px;}
 
-@media (min-width: 768px) and (max-width: 991px) {
-    #SingleStoneLogo {width:150px}
-}
-@media (min-width: 992px) and (max-width: 1199px) {
-    #SingleStoneLogo {width:200px}
-}
+.thumbnail .container {width:350px;height:350px;}
+
 @media (min-width: 768px) {
     #SingleStoneLogo {width:200px}
     .jumbotron {padding:20px}
     footer p {font-size: 1em;margin-top: 15px}
+    .thumbnail .container {width:275px;height:275px;}
+}
+@media (min-width: 992px) and (max-width: 1199px) {
+    #SingleStoneLogo {width:200px}
+    .thumbnail .container {width:225px;height:225px;}
+}
+@media (min-width: 768px) and (max-width: 991px) {
+    #SingleStoneLogo {width:150px}
+    .thumbnail .container {width:330px;height:330px;}
 }
