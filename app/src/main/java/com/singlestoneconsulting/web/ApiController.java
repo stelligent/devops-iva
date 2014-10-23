@@ -53,8 +53,7 @@ public class ApiController {
     @RequestMapping(value = "/twilio", method = RequestMethod.POST)
     public ResponseEntity<String> register(@RequestParam("From") String from,
                                            @RequestParam("Body") String body,
-                                           @RequestParam("MediaUrl") String selfieUrl,
-                                           @RequestParam("MediaUrl1") String selfieUrl1) {
+                                           @RequestParam("MediaUrl0") String selfieUrl) {
         Participant participant = participantRepository.get(from);
         if (participant == null) {
             participant = new Participant(from);
@@ -62,10 +61,12 @@ public class ApiController {
 
         String name = StringUtils.isNotBlank(body) ? body
                     : StringUtils.isNotBlank(participant.getName()) ? participant.getName()
-                    : body;
+                    : from;
         participant.setName(name);
 
-        participant.setSelfieUrl(StringUtils.isBlank(selfieUrl) ? selfieUrl1 : selfieUrl);
+        if (StringUtils.isNotBlank(selfieUrl)) {
+            participant.setSelfieUrl(selfieUrl);
+        }
 
         participantRepository.save(participant);
 
