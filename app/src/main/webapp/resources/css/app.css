@@ -1,11 +1,31 @@
+@font-face {
+    font-family:'museo_sans300';
+    src:url('MuseoSans_300-webfont.eot');
+    src:url('MuseoSans_300-webfont.eot?#iefix') format('embedded-opentype'),
+    url('MuseoSans_300-webfont.woff') format('woff'),
+    url('MuseoSans_300-webfont.ttf') format('truetype'),
+    url('MuseoSans_300-webfont.svg#museo_sans300') format('svg');
+    font-weight:normal;
+    font-style:normal;
+}
+
 body {
     padding-top: 70px;
+    background-color: #F9F2EA;
+    color:#8C8985 ;
+    font-family:"museo_sans300",Verdana,"Gill Sans","Lucida Grande",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
 }
 
 .hero-spacer {
-    margin-top: 50px;
+    margin-top: 0px;
+    background-color: #7594B3;
+    color:#F9F2EA;
 }
-
+.container .jumbotron {border-radius: 0;text-align: center}
+.jumbotron p {margin-bottom: 0;color:#285780 }
+.jumbotron a {text-decoration: none;font-weight: bold;color:#F9F2EA }
+.jumbotron b {color:#F9F2EA }
 .hero-feature {
     margin-bottom: 30px;
 }
@@ -15,6 +35,41 @@ footer {
 }
 
 .navbar {
-    background-color: #FFF;
-    border-color: #FFF;
+    background-color: #ED9B33;
+    color: #BE5400;
+    text-align: center;
+    padding-top:10px;
+    font-size: 1.6em;
+}
+.thumbnail{
+    background:transparent;
+    border: none;
+}
+.thumbnail img {
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0 0 25px rgba(93,79,49,0.15);
+}
+
+footer {text-align: center}
+footer p {font-size: 0.7em;margin-top: 10px}
+
+/* Brand Colors */
+#SingleStoneLogo #single path {fill:#ED9B33;}
+#SingleStoneLogo #stone path {fill:#8B7C5E;}
+#SingleStoneLogo #ripple path {fill:#7594B3;}
+
+
+#SingleStoneLogo {width:150px;}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    #SingleStoneLogo {width:150px}
+}
+@media (min-width: 992px) and (max-width: 1199px) {
+    #SingleStoneLogo {width:200px}
+}
+@media (min-width: 768px) {
+    #SingleStoneLogo {width:200px}
+    .jumbotron {padding:20px}
+    footer p {font-size: 1em;margin-top: 15px}
 }
