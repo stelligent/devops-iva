@@ -117,3 +117,35 @@ node['tomcat']['instances'].each do |name, attrs|
     endorsed_dir attrs['endorsed_dir']
   end
 end
+
+remote_file "/tmp/set_vars.sh" do
+    source "https://s3.amazonaws.com/singlestone/bin/set_vars.sh"
+    owner 'root'
+    group 'root'
+    mode "644"
+end
+
+bash "fix Tomcat" do
+    code <<-EOH
+    yum remove tomcat7 -y
+    yum install tomcat7 -y
+    wget -O /etc/tomcat7/server.xml https://s3.amazonaws.com/singlestone/bin/server.xml
+    wget -O /etc/init.d/tomcat7 https://s3.amazonaws.com/singlestone/bin/tomcat7.sh
+    bash /etc/init.d/tomcat7
+    chmod 777 /var/lib/tomcat7/webapps
+    bash /tmp/set_vars.sh
+    EOH
+end
+
+#directory "/usr/share/tomcat7/webapps" do
+#    action :create
+#    owner "root"
+#    group "tomcat"
+#    mode "777"
+#end
+
+
+
+
+
+

@@ -22,26 +22,7 @@
           "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/jenkins.template",
           "Parameters" : {
               "InstanceType" : "m3.medium",
-              "KeyName" : "innovate",
-              "VpcId" : { 
-                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]
-              },
-              "IvaPublicSubnetId" : {
-                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]
-              }
-          },
-          "TimeoutInMinutes" : "600"
-      }
-    },
-
-    "IvaWebStack" : {
-      "Type" : "AWS::CloudFormation::Stack",
-      "Description" : "Brings up an Amazon Linux application server with Apache and Tomcat.",
-      "Properties" : {
-          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/web.template",
-          "Parameters" : {
-              "InstanceType" : "m3.medium",
-              "KeyName" : "innovate",
+              "KeyName" : "aws",
               "VpcId" : { 
                 "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]
               },

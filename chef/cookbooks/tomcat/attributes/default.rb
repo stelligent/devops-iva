@@ -17,7 +17,7 @@
 # limitations under the License.
 
 default['tomcat']['base_version'] = 7
-default['tomcat']['port'] = 8080
+default['tomcat']['port'] = 80
 default['tomcat']['proxy_port'] = nil
 default['tomcat']['ssl_port'] = 8443
 default['tomcat']['ssl_proxy_port'] = nil

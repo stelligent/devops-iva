@@ -36,4 +36,50 @@ rescue Chef::Exceptions::RecipeNotFound
     "continue to encounter this error, please file an issue."
 end
 
-jenkins_plugin 'git'
+directory "/etc/chef" do
+	action :create
+end
+
+jenkins_plugin 'git' do
+  notifies :restart, 'service[jenkins]', :immediately
+end
+
+directory "/var/lib/jenkins/jobs/Build\ and\ Deploy\ App/" do
+	action :create
+	owner 'jenkins'
+	group 'jenkins'
+	mode "0755"
+	recursive true
+end
+
+cookbook_file "/var/lib/jenkins/credentials.xml" do
+	source "credentials.xml"
+	owner 'jenkins'
+	group 'jenkins'
+	mode "0644"
+	action :create
+end
+
+cookbook_file "/var/lib/jenkins/jobs/Build\ and\ Deploy\ App/config.xml" do
+	source "config.xml"
+	owner 'jenkins'
+	group 'jenkins'
+	mode "0644"
+	action :create
+end
+
+cookbook_file "/var/lib/jenkins/hudson.tasks.Maven.xml" do
+	source "hudson.tasks.Maven.xml"
+	owner 'jenkins'
+	group 'jenkins'
+	mode "0644"
+	action :create
+	notifies :restart, 'service[jenkins]', :immediately
+end
+
+bash "set permissions on deployment key" do
+	code <<-EOH
+	chmod 600 /var/lib/jenkins/.ssh/innovate.pem
+	chown jenkins:jenkins /var/lib/jenkins/.ssh/innovate.pem
+	EOH
+end

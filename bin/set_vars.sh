@@ -1,0 +1,2 @@
+#!/bin/bash -v
+echo 'JAVA_OPTS="-Daws.accessKeyId=MY_AWS_ACCESS_KEY_ID -Daws.secretKey=MY_AWS_SECRET_KEY -Dtwilio.authToken=MY_TWILIO_AUTH_TOKEN -Dtwilio.sid=MY_TWILIO_SID -javaagent:/opt/appdynamics/javaagent.jar"' >> /etc/tomcat7/tomcat7.conf

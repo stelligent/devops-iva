@@ -12,4 +12,4 @@ file_store_path			"/srv/chef/file_store"
 file_cache_path			"/srv/chef/cache"
 pid_file				"/var/run/chef/chef-client.pid"
 json_attribs			"/opt/chef/node.json"
-splay					120
+interval				60
