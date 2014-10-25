@@ -1,0 +1,151 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "AWS CLI",
+
+  "Parameters" : {
+
+    "KeyName" : {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+      "Type" : "String",
+      "Default" : "innovate",
+      "MinLength": "1",
+      "MaxLength": "64",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
+    },
+
+    "InstanceType" : {
+      "Type" : "String",
+      "Default" : "m1.medium",
+      "AllowedValues" : [ "t2.micro", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "c1.medium", "c1.xlarge"]
+    },
+    "VpcId" : {
+        "Description" : "This parameter will add the AWS CLI to the default VPC.",
+        "Type" : "String",
+        "Default" : "vpc-8223e0e7"
+    }
+  },
+
+  "Mappings" : {
+    "AWSInstanceType2Arch" : {
+      "t2.micro"   : { "Arch" : "64" },
+      "m1.small"   : { "Arch" : "64" },
+      "m1.medium"  : { "Arch" : "64" },
+      "m1.large"   : { "Arch" : "64" },
+      "m1.xlarge"  : { "Arch" : "64" },
+      "m2.xlarge"  : { "Arch" : "64" },
+      "m2.2xlarge" : { "Arch" : "64" },
+      "m2.4xlarge" : { "Arch" : "64" },
+      "c1.medium"  : { "Arch" : "64" },
+      "c1.xlarge"  : { "Arch" : "64" }
+    },
+    "AWSRegionArch2AMI" : {
+      "us-east-1"      : { "32" : "ami-178e927e", "64" : "ami-fb8e9292" },
+      "us-west-1"      : { "32" : "ami-951945d0", "64" : "ami-971945d2" },
+      "us-west-2"      : { "32" : "ami-1e3a502e", "64" : "ami-043a5034" },
+      "eu-west-1"      : { "32" : "ami-2d18e35a", "64" : "ami-2918e35e" }
+    }
+  },
+  "Resources" : {
+    "RootRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [ {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [ "ec2.amazonaws.com" ]
+            },
+            "Action": [ "sts:AssumeRole" ]
+          } ]
+        },
+        "Path": "/",
+        "Policies": [ {
+          "PolicyName": "root",
+          "PolicyDocument": {
+            "Statement": [ {
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+            } ]
+          }
+        } ]
+      }
+    },
+    "RootInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [ {
+          "Ref": "RootRole"
+        } ]
+      }
+    },
+
+    "WebServer": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "IamInstanceProfile": { "Ref": "RootInstanceProfile" },
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+                                          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
+        "InstanceType"     : { "Ref" : "InstanceType" },
+        "SecurityGroupIds"   : [ "sg-553ba630" ],
+        "KeyName"        : { "Ref" : "KeyName" },
+        "Tags": [ { "Key": "Name", "Value": "AWS Command Line Interface Instance" } ],
+        "SubnetId" : "subnet-4615346e",
+        "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
+          "#!/bin/bash -v\n",
+
+          "# Remove Ruby 1.8.7\n",
+          "yum erase -y ruby rubygems\n",
+
+          "# Install Ruby 1.9.3\n",
+          "yum -y install ruby19-devel\n",
+          "yum -y install libxml2-devel\n",
+          "yum -y install libxslt-devel\n",
+          "yum -y install git\n",
+          "yum -y install make\n",
+          "yum -y install gcc\n",
+
+          "# Move Ruby 1.9.3 to Default Ruby\n",
+          "ln -s /usr/bin/ruby1.9 /usr/bin/ruby\n",
+          "ln -s /usr/bin/gem1.9 /usr/bin/gem\n",
+
+          "gem install bundler\n",
+
+          "/opt/aws/bin/cfn-signal", " -e 0", " '", { "Ref" : "WaitHandle" }, "'","\n"
+        ]]}}
+      }
+    },
+
+    "WaitHandle" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle"
+    },
+
+    "WaitCondition" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "DependsOn" : "WebServer",
+      "Properties" : {
+        "Handle" : { "Ref" : "WaitHandle" },
+        "Timeout" : "900"
+      }
+    }
+  },
+
+  "Outputs" : {
+    "InstanceId" : {
+      "Description" : "This is the instance ID of the AWS CLI server.",
+      "Value" : { 
+        "Ref" : "WebServer"
+        }
+    },
+
+    "PublicIp" : {
+      "Description" : "This is the publicly addressable IP address assigned to the InnovateVA AWS CLI server.  Will need this for Route53.",
+      "Value" : {
+        "Fn::GetAtt": [ "WebServer", "PublicIp" ]
+      }
+    }
+  }
+}

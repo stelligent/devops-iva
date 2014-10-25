@@ -26,7 +26,7 @@
 
     "KeyName" : {
         "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
-        "Default" : "aws",
+        "Default" : "innovate",
         "Type" : "String",
         "MinLength" : "1",
         "MaxLength" : "255",
@@ -109,26 +109,27 @@
         ],
         "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
         "#!/bin/bash -v\n",
-        "wget -O /tmp/hostname.sh           https://s3.amazonaws.com/singlestone/chef/hostname.sh\n",
-        "bash /tmp/hostname.sh\n",
-        "mkdir /var/log/newrelic\n",
-        "hostname IVAApp\n",
-        "cd /tmp/\n",
-        "mkdir /opt\n",
-        "cd /opt\n",
-        "mkdir chef\n",
-        "wget -O /tmp/chef-client.rpm       https://s3.amazonaws.com/singlestone/binaries/chefdk-0.3.0-1.x86_64.rpm\n",
-        "rpm -Uvh /tmp/chef-client.rpm\n",
-
-        "wget -O /opt/chef/client.rb        https://s3.amazonaws.com/singlestone/chef/webclient.rb\n",
-        "wget -O /opt/chef/validator.pem    https://s3.amazonaws.com/singlestone/chef/validator.pem\n",
-        "wget -O /opt/chef/node.json        https://s3.amazonaws.com/singlestone/chef/webnode.json\n",
-        "export HOSTNAME=`/usr/bin/curl -s http://169.254.169.254/latest/meta-data/local-hostname`\n",
-
-        "chef-client -c /opt/chef/client.rb\n",
-        "touch /root/chef-complete"
+        "wget -O /tmp/bootstrap_app.sh      https://s3.amazonaws.com/singlestone/bin/bootstrap_app.sh\n",
+        "bash /tmp/bootstrap_app.sh\n"
         ]]}}
       }
+    },
+
+    "InnovateParticipants": {
+        "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "KeySchema": {
+              "HashKeyElement": {
+                "AttributeName": "PhoneNumber",
+                "AttributeType": "S"
+              }
+            },
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": "1",
+              "WriteCapacityUnits": "1"
+            },
+            "TableName" : "InnovateParticipants"
+          }
     },
 
     "IvaAppDNS" : {
@@ -144,14 +145,6 @@
         "Type" : "A"
       }
     },
-
-    "IvaSelfieS3Bucket" : {
-      "Type" : "AWS::S3::Bucket",
-      "Properties" : {
-         "AccessControl" : "PublicReadWrite",
-         "BucketName" : "selfie-bucket"
-      }
-   },
 
     "IvaAppSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
@@ -197,6 +190,12 @@
             "IpProtocol" : "tcp",
             "FromPort" : "443",
             "ToPort" : "443",
+            "CidrIp" : "0.0.0.0/0"
+          },
+          {
+            "IpProtocol" : "tcp",
+            "FromPort" : "8090",
+            "ToPort" : "8090",
             "CidrIp" : "0.0.0.0/0"
           },
           {

@@ -27,7 +27,7 @@
     "KeyName" : {
         "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
         "Type" : "String",
-        "Default" : "aws",
+        "Default" : "innovate",
         "MinLength" : "1",
         "MaxLength" : "255",
         "AllowedPattern" : "[\\x20-\\x7E]*",
@@ -95,24 +95,8 @@
         ],
         "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
         "#!/bin/bash -v\n",
-        "wget -O /tmp/hostname.sh           https://s3.amazonaws.com/singlestone/chef/hostname.sh\n",
-        "bash /tmp/hostname.sh\n",
-        "hostname InnovateVaJenkins\n",
-        "mkdir /var/log/newrelic\n",
-        "cd /tmp/\n",
-        "mkdir /opt\n",
-        "cd /opt\n",
-        "mkdir chef\n",
-        "wget -O /tmp/chef-client.rpm       https://s3.amazonaws.com/singlestone/binaries/chefdk-0.3.0-1.x86_64.rpm\n",
-        "rpm -Uvh /tmp/chef-client.rpm\n",
-
-        "wget -O /opt/chef/client.rb        https://s3.amazonaws.com/singlestone/chef/jenkinsclient.rb\n",
-        "wget -O /opt/chef/validator.pem    https://s3.amazonaws.com/singlestone/chef/validator.pem\n",
-        "wget -O /opt/chef/node.json        https://s3.amazonaws.com/singlestone/chef/cinode.json\n",
-        "export HOSTNAME=`/usr/bin/curl -s http://169.254.169.254/latest/meta-data/local-hostname`\n",
-
-        "chef-client -c /opt/chef/client.rb\n",
-        "touch /root/chef-complete"
+        "wget -O /tmp/bootstrap_jenkins.sh  https://s3.amazonaws.com/singlestone/bin/bootstrap_jenkins.sh\n",
+        "bash /tmp/bootstrap_jenkins.sh\n"
         ]]}}
       }
     },

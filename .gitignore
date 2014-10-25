@@ -1,5 +1,10 @@
 .idea/
 target/
 
+chef/ssc-validator.pem
+chef/validator.pem
+chef/my_secret_key
+chef/dtashner.pem
+
 *.iml
 .DS_Store
