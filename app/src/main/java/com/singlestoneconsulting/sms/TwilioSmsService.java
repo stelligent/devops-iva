@@ -1,5 +1,6 @@
 package com.singlestoneconsulting.sms;
 
+import com.singlestoneconsulting.util.Provider;
 import com.twilio.sdk.TwilioRestClient;
 import com.twilio.sdk.TwilioRestException;
 import com.twilio.sdk.verbs.Sms;
@@ -20,8 +21,8 @@ public class TwilioSmsService implements SmsService {
     private final TwilioRestClient twilio;
 
     @Autowired
-    public TwilioSmsService(TwilioCredentials twilioCredentials) {
-        this.twilio = new TwilioRestClient(twilioCredentials.getSid(), twilioCredentials.getAuthToken());
+    public TwilioSmsService(final Provider<TwilioRestClient> twilioRestClientProvider) {
+        this.twilio = twilioRestClientProvider.provide();
     }
 
     @Override
@@ -35,7 +36,6 @@ public class TwilioSmsService implements SmsService {
             twilio.getAccount().getSmsFactory().create(params);
         } catch (TwilioRestException e) {
             LOGGER.error("Failed to send SMS.", e);
-//            throw new RuntimeException(e);
         }
     }
 
