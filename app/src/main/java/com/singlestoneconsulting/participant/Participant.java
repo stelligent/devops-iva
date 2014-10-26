@@ -25,6 +25,11 @@ public class Participant {
         this.registered = new Date();
     }
 
+    public Participant(String phoneNumber, String name) {
+        this(phoneNumber);
+        this.setName(name);
+    }
+
     public String getPhoneNumber() {
         return phoneNumber;
     }

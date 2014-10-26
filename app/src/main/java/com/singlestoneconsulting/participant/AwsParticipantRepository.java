@@ -1,9 +1,10 @@
 package com.singlestoneconsulting.participant;
 
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.singlestoneconsulting.util.Provider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashSet;
@@ -13,9 +14,9 @@ import java.util.Set;
 public class AwsParticipantRepository implements ParticipantRepository {
     private final DynamoDBMapper dynamoDB;
 
-    public AwsParticipantRepository() {
-        AmazonDynamoDBClient client = new AmazonDynamoDBClient(new DefaultAWSCredentialsProviderChain());
-        dynamoDB = new DynamoDBMapper(client);
+    @Autowired
+    public AwsParticipantRepository(final Provider<AmazonDynamoDB> amazonDynamoDBProvider) {
+        dynamoDB = new DynamoDBMapper(amazonDynamoDBProvider.provide());
     }
 
     @Override

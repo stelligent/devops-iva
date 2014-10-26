@@ -50,7 +50,7 @@ public class ApiController {
     }
 
     @RequestMapping(value = "/twilio", method = RequestMethod.POST)
-    public ResponseEntity<String> register(@RequestParam("From") String from, @RequestParam("Body") String body) {
+    public ResponseEntity<String> sms(@RequestParam("From") String from, @RequestParam("Body") String body) {
         Participant participant = participantRepository.get(from);
         if (participant == null) {
             participant = new Participant(from);
