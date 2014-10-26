@@ -68,7 +68,7 @@ public class ApiControllerTest {
         controller.postConstruct();
 
         // then
-        verify(smsService, times(1)).sendText("1", "Hey 1, check out the new version: http://singlestonedemo.com:8080");
+        verify(smsService, times(1)).sendText("1", "Hey 1, send us a selfie! Check out the new version: http://singlestonedemo.com:8080");
     }
 
     @Test
@@ -76,12 +76,13 @@ public class ApiControllerTest {
         // given
         String from = "5551212";
         String body = "Jay";
+        String selfUrl = "http://foo.com";
         String reply = "REPLY";
 
         when(smsService.getResponse(anyString())).thenReturn(reply);
 
         // when
-        ResponseEntity<String> response = controller.sms(from, body);
+        ResponseEntity<String> response = controller.sms(from, body, selfUrl);
 
         // then
         assertThat(response.getBody(), is(reply));
@@ -99,7 +100,7 @@ public class ApiControllerTest {
         when(smsService.getResponse(anyString())).thenReturn(reply);
 
         // when
-        ResponseEntity<String> response = controller.sms(from, body);
+        ResponseEntity<String> response = controller.sms(from, body, null);
 
         // then
         assertThat(response.getBody(), is(reply));
