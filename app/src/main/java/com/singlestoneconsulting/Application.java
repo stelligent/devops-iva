@@ -1,3 +1,8 @@
 package com.singlestoneconsulting;
 
-public interface Application {}
+/**
+ * Marker interface for Application.
+ */
+public interface Application {
+}
+
