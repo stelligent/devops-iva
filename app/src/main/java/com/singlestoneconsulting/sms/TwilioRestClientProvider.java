@@ -11,8 +11,8 @@ public final class TwilioRestClientProvider implements Provider<TwilioRestClient
     private final TwilioRestClient twilioRestClient;
 
     @Autowired
-    public TwilioRestClientProvider(final TwilioCredentials twilioCredentials) {
-        this.twilioRestClient = new TwilioRestClient(twilioCredentials.getSid(), twilioCredentials.getAuthToken());
+    public TwilioRestClientProvider(final SmsCredentials smsCredentials) {
+        this.twilioRestClient = new TwilioRestClient(smsCredentials.getSid(), smsCredentials.getAuthToken());
     }
 
     @Override

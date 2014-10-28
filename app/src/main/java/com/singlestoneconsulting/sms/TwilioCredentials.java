@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public final class TwilioCredentials {
+public final class TwilioCredentials implements SmsCredentials {
     private static final Logger LOGGER = LoggerFactory.getLogger(TwilioCredentials.class);
 
     private final String sid;
@@ -30,10 +30,12 @@ public final class TwilioCredentials {
         }
     }
 
+    @Override
     public String getSid() {
         return sid;
     }
 
+    @Override
     public String getAuthToken() {
         return authToken;
     }

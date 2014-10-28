@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 public class TwilioRestClientProviderTest {
 
     @Mock
-    TwilioCredentials credentials;
+    SmsCredentials credentials;
 
     @Test
     public void test() {

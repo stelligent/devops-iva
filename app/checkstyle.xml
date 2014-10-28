@@ -17,10 +17,18 @@
     </module>
 
     <module name="TreeWalker">
-        <!--<module name="JavadocMethod"/>-->
-        <!--<module name="JavadocType"/>-->
-        <!--<module name="JavadocVariable"/>-->
-        <!--<module name="JavadocStyle"/>-->
+        <module name="JavadocMethod">
+            <property name="severity" value="info"/>
+        </module>
+        <module name="JavadocType">
+            <property name="severity" value="info"/>
+        </module>
+        <module name="JavadocVariable">
+            <property name="severity" value="info"/>
+        </module>
+        <module name="JavadocStyle">
+            <property name="severity" value="info"/>
+        </module>
 
         <module name="ConstantName"/>
         <module name="LocalFinalVariableName"/>
