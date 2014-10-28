@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,7 +48,7 @@ public class ApiController {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/twilio", method = RequestMethod.POST)
+    @RequestMapping(value = "/twilio", method = POST)
     public ResponseEntity<String> sms(@RequestParam("From") String from, @RequestParam("Body") String body) {
         Participant participant = participantRepository.get(from);
         if (participant == null) {
@@ -71,7 +70,7 @@ public class ApiController {
 
     private ResponseEntity<String> sendXml(String xml) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML);
+        headers.setContentType(APPLICATION_XML);
         return new ResponseEntity<>(xml, headers, HttpStatus.OK);
     }
 }
