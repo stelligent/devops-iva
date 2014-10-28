@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 
 @Service
-public class TwilioSmsService implements SmsService {
+public final class TwilioSmsService implements SmsService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TwilioSmsService.class);
     private static final String FROM = "+18046328573";
 
@@ -26,7 +26,7 @@ public class TwilioSmsService implements SmsService {
     }
 
     @Override
-    public void sendText(String to, String message) {
+    public void sendText(final String to, final String message) {
         HashMap<String, String> params = new HashMap<>();
         params.put("From", FROM);
         params.put("To", to);
@@ -40,7 +40,7 @@ public class TwilioSmsService implements SmsService {
     }
 
     @Override
-    public String getResponse(String message) {
+    public String getResponse(final String message) {
         TwiMLResponse twiml = new TwiMLResponse();
         try {
             twiml.append(new Sms(message));

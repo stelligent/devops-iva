@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import com.singlestoneconsulting.Application;
 
 @Configuration
-@ComponentScan(basePackageClasses = Application.class, excludeFilters = @Filter({Controller.class, Configuration.class}))
+@ComponentScan(basePackageClasses = Application.class,
+        excludeFilters = @Filter({ Controller.class, Configuration.class }))
 class ApplicationConfig {
 }

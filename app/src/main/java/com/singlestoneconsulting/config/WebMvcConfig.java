@@ -24,14 +24,16 @@ import org.thymeleaf.templateresolver.TemplateResolver;
 import com.singlestoneconsulting.Application;
 
 @Configuration
-@ComponentScan(basePackageClasses = Application.class, includeFilters = @Filter(Controller.class), useDefaultFilters = false)
-class WebMvcConfig extends WebMvcConfigurationSupport {
+@ComponentScan(basePackageClasses = Application.class,
+        includeFilters = @Filter(Controller.class), useDefaultFilters = false)
+final class WebMvcConfig extends WebMvcConfigurationSupport {
 
     private static final String MESSAGE_SOURCE = "/WEB-INF/i18n/messages";
     private static final String VIEWS = "/WEB-INF/views/";
 
     private static final String RESOURCES_LOCATION = "/resources/";
     private static final String RESOURCES_HANDLER = RESOURCES_LOCATION + "**";
+    private static final int CACHE_SECONDS = 5;
 
     @Override
     public RequestMappingHandlerMapping requestMappingHandlerMapping() {
@@ -45,7 +47,7 @@ class WebMvcConfig extends WebMvcConfigurationSupport {
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
         messageSource.setBasename(MESSAGE_SOURCE);
-        messageSource.setCacheSeconds(5);
+        messageSource.setCacheSeconds(CACHE_SECONDS);
         return messageSource;
     }
 
@@ -83,12 +85,12 @@ class WebMvcConfig extends WebMvcConfigurationSupport {
     }
 
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         registry.addResourceHandler(RESOURCES_HANDLER).addResourceLocations(RESOURCES_LOCATION);
     }
 
     @Override
-    public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+    public void configureDefaultServletHandling(final DefaultServletHandlerConfigurer configurer) {
         configurer.enable();
     }
 

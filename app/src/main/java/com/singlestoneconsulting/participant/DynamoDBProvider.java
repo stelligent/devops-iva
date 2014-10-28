@@ -7,7 +7,7 @@ import com.singlestoneconsulting.util.Provider;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DynamoDBProvider implements Provider<AmazonDynamoDB> {
+public final class DynamoDBProvider implements Provider<AmazonDynamoDB> {
 
     private final AmazonDynamoDBClient amazonDynamoDBClient;
 

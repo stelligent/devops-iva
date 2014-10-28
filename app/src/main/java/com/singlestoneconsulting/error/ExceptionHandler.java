@@ -10,15 +10,12 @@ import com.google.common.base.Throwables;
  * General error handler for the application.
  */
 @ControllerAdvice
-class ExceptionHandler {
+final class ExceptionHandler {
 
-	/**
-	 * Handle exceptions thrown by handlers.
-	 */
-	@org.springframework.web.bind.annotation.ExceptionHandler(value = Exception.class)	
-	public ModelAndView exception(Exception exception, WebRequest request) {
-		ModelAndView modelAndView = new ModelAndView("error/general");
-		modelAndView.addObject("errorMessage", Throwables.getRootCause(exception));
-		return modelAndView;
-	}
+    @org.springframework.web.bind.annotation.ExceptionHandler(value = Exception.class)
+    public ModelAndView exception(final Exception exception, final WebRequest request) {
+        ModelAndView modelAndView = new ModelAndView("error/general");
+        modelAndView.addObject("errorMessage", Throwables.getRootCause(exception));
+        return modelAndView;
+    }
 }

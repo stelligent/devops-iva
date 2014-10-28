@@ -6,7 +6,6 @@ import com.singlestoneconsulting.sms.SmsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,12 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import java.util.Set;
 
-import static org.springframework.http.MediaType.*;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @RequestMapping("/api")
-public class ApiController {
+public final class ApiController {
 
     private static final String MSG_REPLY = "Thanks %s! Check it out: %s";
     private static final String MSG_DEPLOY = "Hey %s, check out the new version: %s";
@@ -30,7 +31,7 @@ public class ApiController {
     private final SmsService smsService;
 
     @Autowired
-    public ApiController(ParticipantRepository participantRepository, SmsService smsService) {
+    public ApiController(final ParticipantRepository participantRepository, final SmsService smsService) {
         this.participantRepository = participantRepository;
         this.smsService = smsService;
     }
@@ -41,7 +42,7 @@ public class ApiController {
     }
 
     @RequestMapping(value = "/broadcast", method = POST)
-    public ResponseEntity<String> broadcast(String message) {
+    public ResponseEntity<String> broadcast(final String message) {
         for (Participant p : participantRepository.all()) {
             smsService.sendText(p.getPhoneNumber(), message);
         }
@@ -49,7 +50,8 @@ public class ApiController {
     }
 
     @RequestMapping(value = "/twilio", method = POST)
-    public ResponseEntity<String> sms(@RequestParam("From") String from, @RequestParam("Body") String body) {
+    public ResponseEntity<String> sms(@RequestParam("From") final String from,
+                                      @RequestParam("Body") final String body) {
         Participant participant = participantRepository.get(from);
         if (participant == null) {
             participant = new Participant(from);
@@ -68,7 +70,7 @@ public class ApiController {
         }
     }
 
-    private ResponseEntity<String> sendXml(String xml) {
+    private ResponseEntity<String> sendXml(final String xml) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(APPLICATION_XML);
         return new ResponseEntity<>(xml, headers, HttpStatus.OK);

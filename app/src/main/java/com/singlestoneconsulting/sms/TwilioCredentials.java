@@ -5,24 +5,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TwilioCredentials {
+public final class TwilioCredentials {
     private static final Logger LOGGER = LoggerFactory.getLogger(TwilioCredentials.class);
 
     private final String sid;
     private final String authToken;
 
     public TwilioCredentials() {
-        String sid = System.getenv("TWILIO_SID");
-        if (sid == null) {
-            sid = System.getProperty("twilio.sid");
+        String twilioSid = System.getenv("TWILIO_SID");
+        if (twilioSid == null) {
+            twilioSid = System.getProperty("twilio.sid");
         }
-        this.sid = sid;
+        this.sid = twilioSid;
 
-        String authToken = System.getenv("TWILIO_AUTH_TOKEN");
-        if (authToken == null) {
-            authToken = System.getProperty("twilio.authToken");
+        String twilioAuthToken = System.getenv("TWILIO_AUTH_TOKEN");
+        if (twilioAuthToken == null) {
+            twilioAuthToken = System.getProperty("twilio.authToken");
         }
-        this.authToken = authToken;
+        this.authToken = twilioAuthToken;
 
         if (this.sid == null || this.authToken == null) {
             LOGGER.error("Twilio secrets not found");

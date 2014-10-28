@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Repository
-public class AwsParticipantRepository implements ParticipantRepository {
+public final class AwsParticipantRepository implements ParticipantRepository {
     private final DynamoDBMapper dynamoDB;
 
     @Autowired
@@ -20,12 +20,12 @@ public class AwsParticipantRepository implements ParticipantRepository {
     }
 
     @Override
-    public Participant get(String phoneNumber) {
+    public Participant get(final String phoneNumber) {
         return dynamoDB.load(Participant.class, phoneNumber);
     }
 
     @Override
-    public void save(Participant participant) {
+    public void save(final Participant participant) {
         dynamoDB.save(participant);
     }
 
