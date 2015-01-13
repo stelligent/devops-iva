@@ -1,46 +1,46 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
-  
+
   "Description" : "This AWS CloudFormation template defines the creation of the InnovateVA NAT instance.  This instance allows communication outbound from private subnet instances for software updates. This template creates a route entry in the VPC's private route table.",
 
   "Parameters" : {
-  
+
     "InstanceType" : {
-        "Description" : "Enter m1.small, m3.medium (for high CPU), or m1.large.  Default is m1.small.",
-        "Default" : "m3.medium",
-        "Type" : "String",
-        "AllowedValues" : [ "m1.small","m3.medium","m1.large" ],
-        "ConstraintDescription" : "Must be a valid EC2 instance type."
+      "Description" : "Enter m1.small, m3.medium (for high CPU), or m1.large.  Default is m1.small.",
+      "Default" : "m3.medium",
+      "Type" : "String",
+      "AllowedValues" : [ "m1.small","m3.medium","m1.large" ],
+      "ConstraintDescription" : "Must be a valid EC2 instance type."
     },
 
     "KeyName" : {
-        "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
-        "Default" : "aws",
-        "Type" : "String",
-        "MinLength" : "1",
-        "MaxLength" : "255",
-        "AllowedPattern" : "[\\x20-\\x7E]*",
-        "ConstraintDescription" : "can contain only ASCII characters."
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+      "Default" : "aws",
+      "Type" : "String",
+      "MinLength" : "1",
+      "MaxLength" : "255",
+      "AllowedPattern" : "[\\x20-\\x7E]*",
+      "ConstraintDescription" : "can contain only ASCII characters."
     },
 
     "VpcId" : {
-        "Description" : "This parameter will pull in the VPC ID returned from vpc.template.",
-        "Type" : "String"
+      "Description" : "This parameter will pull in the VPC ID returned from vpc.template.",
+      "Type" : "String"
     },
 
     "IvaPublicSubnetId" : {
-        "Description" : "This parameter will pull in the Public Subnet ID returned from vpc.template.",
-        "Type" : "String"
+      "Description" : "This parameter will pull in the Public Subnet ID returned from vpc.template.",
+      "Type" : "String"
     },
 
     "IvaPrivateRouteTableId" : {
-        "Description" : "This parameter will pull in the Private Route Table ID returned from vpc.template",
-        "Type" : "String"
+      "Description" : "This parameter will pull in the Private Route Table ID returned from vpc.template",
+      "Type" : "String"
     },
 
     "IvaBastionSecurityGroupId" : {
-        "Description" : "This parameter will pull in the Bastion Security Group ID returned from bastion.template.",
-        "Type" : "String"
+      "Description" : "This parameter will pull in the Bastion Security Group ID returned from bastion.template.",
+      "Type" : "String"
     }
   },
 
@@ -89,8 +89,8 @@
           }
         ]
       }
-    },  
-    
+    },
+
     "IvaNatSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
@@ -106,7 +106,7 @@
         ]
       }
     },
-    
+
     "ingress1" : {
       "Type" : "AWS::EC2::SecurityGroupIngress",
       "Properties" : {
@@ -120,7 +120,7 @@
         "SourceSecurityGroupOwnerId" : "592342700041"
       }
     },
-    
+
     "ingress2" : {
       "Type" : "AWS::EC2::SecurityGroupIngress",
       "Properties" : {
@@ -149,14 +149,14 @@
         }
       }
     }
-  },  
+  },
 
   "Outputs" : {
     "InstanceId" : {
       "Description" : "This is the instance ID of the NAT server.",
       "Value" : {
         "Ref" : "IvaNat"
-        }
+      }
     }
   }
 }
