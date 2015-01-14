@@ -5,81 +5,81 @@
 
   "Parameters" : {
 
-    "AMI" : {
-        "Description" : "This is the ID of the AMI to use for the Jenkins server. Default is Amazon Linux in US-East region.",
-        "Type" : "String",
-        "Default" : "ami-08842d60"
-    },
-
     "HostedZone" : {
       "Description" : "This is the hosted zone you will connect jenkins to",
       "Type" : "String",
       "Default" : "singlestonedemo.com"
     },
 
+    "S3Bucket" : {
+      "Description" : "This is the s3 bucket where your cfn templates are stored",
+      "Type" : "String",
+      "Default" : "singlestonedemo"
+    },
+
     "InstanceType" : {
-        "Description" : "Enter m3.medium, m3.large, or m3.xlarge.  Default is m3.medium.",
-        "Default" : "m3.medium",
-        "Type" : "String",
-        "AllowedValues" : [ "m3.medium","m3.large","m3.xlarge" ],
-        "ConstraintDescription" : "Must be a valid EC2 instance type."
+      "Description" : "Enter m3.medium, m3.large, or m3.xlarge.  Default is m3.medium.",
+      "Default" : "m3.medium",
+      "Type" : "String",
+      "AllowedValues" : [ "m3.medium","m3.large","m3.xlarge" ],
+      "ConstraintDescription" : "Must be a valid EC2 instance type."
     },
 
     "IvaPublicSubnetId" : {
-        "Description" : "This parameter will pull in the Public Subnet ID returned from vpc.template.",
-        "Type" : "String"
+      "Description" : "This parameter will pull in the Public Subnet ID returned from vpc.template.",
+      "Type" : "String"
     },
 
     "KeyName" : {
-        "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
-        "Default" : "innovate",
-        "Type" : "String",
-        "MinLength" : "1",
-        "MaxLength" : "255",
-        "AllowedPattern" : "[\\x20-\\x7E]*",
-        "ConstraintDescription" : "can contain only ASCII characters."
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+      "Default" : "innovate",
+      "Type" : "String",
+      "MinLength" : "1",
+      "MaxLength" : "255",
+      "AllowedPattern" : "[\\x20-\\x7E]*",
+      "ConstraintDescription" : "can contain only ASCII characters."
     },
 
     "SourceSecurityGroupOwnerId" : {
-        "Description" : "This parameter identifies the AWS account number under which all resources live.",
-        "Default" : "592342700041",
-        "Type" : "String"
+      "Description" : "This parameter identifies the AWS account number under which all resources live.",
+      "Default" : "592342700041",
+      "Type" : "String"
     },
 
     "VpcId" : {
-        "Description" : "This parameter will pull in the VPC ID returned from vpc.template.",
-        "Type" : "String"
+      "Description" : "This parameter will pull in the VPC ID returned from vpc.template.",
+      "Type" : "String"
     }
   },
 
   "Mappings" : {
-    "RegionMap" : {
-        "us-east-1" : {
-        "AMI" : "ami-08842d60"
-        },
-        "us-west-1" : {
-        "AMI" : "ami-cfa8a18a"
-        },
-        "us-west-2" : {
-        "AMI" : "ami-8786c6b7"
-        }
+    "AWSInstanceType2Arch" : {
+      "t2.micro"   : { "Arch" : "64" },
+      "m1.small"   : { "Arch" : "64" },
+      "m1.medium"  : { "Arch" : "64" },
+      "m1.large"   : { "Arch" : "64" },
+      "m1.xlarge"  : { "Arch" : "64" },
+      "m2.xlarge"  : { "Arch" : "64" },
+      "m2.2xlarge" : { "Arch" : "64" },
+      "m2.4xlarge" : { "Arch" : "64" },
+      "m3.medium"  : { "Arch" : "64" },
+      "c1.medium"  : { "Arch" : "64" },
+      "c1.xlarge"  : { "Arch" : "64" }
+    },
+    "AWSRegionArch2AMI" : {
+      "us-east-1"      : { "64" : "ami-b66ed3de" }
     }
   },
 
   "Resources" : {
     "IvaAppInstance" : {
       "Type" : "AWS::EC2::Instance",
-        "Properties" : {
+      "Properties" : {
         "DisableApiTermination" : "FALSE",
-        "ImageId" : {
-          "Ref" : "AMI"
-        },
-        "InstanceType" : {
-          "Ref" : "InstanceType"
-        },
-        "KeyName" : {
-          "Ref" : "KeyName"
-        },
+        "ImageId" :  { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+                                          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
+       "InstanceType" : { "Ref" : "InstanceType" },
+        "KeyName" : { "Ref" : "KeyName" },
         "Monitoring" : "true",
         "Tags" : [
           {
@@ -113,29 +113,54 @@
             "AssociatePublicIpAddress" : "true"
           }
         ],
-        "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
-        "#!/bin/bash -v\n",
-        "wget -O /tmp/bootstrap_app.sh      https://s3.amazonaws.com/singlestone/bin/bootstrap_app.sh\n",
-        "bash /tmp/bootstrap_app.sh\n"
+        "Userdata" : { "Fn::Base64" : { "Fn::Join" : ["", [
+          "#!/bin/bash -v\n",
+          "# Make directories\n",
+          "mkdir /var/log/newrelic\n",
+          "mkdir -p /opt/chef\n",
+          "mkdir /tmp\n",
+
+          "# Grab and install Chef Client\n",
+          "wget -O /tmp/chef-client.rpm       https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/binaries/chefdk-0.3.0-1.x86_64.rpm\n",
+          "rpm -Uvh /tmp/chef-client.rpm\n",
+
+          "# Grab configuration artifacts\n",
+          "wget -O /tmp/hostname.sh           https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/hostname.sh\n",
+          "wget -O /opt/chef/client.rb        https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/webclient.rb\n",
+          "wget -O /opt/chef/node.json        https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/webnode.json\n",
+
+          "# Grab security artifacts\n",
+          "wget -O /opt/chef/validator.pem    https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/validator.pem\n",
+
+          "# Set hostname\n",
+          "bash /tmp/hostname.sh\n",
+          "hostname InnovateVaApp\n",
+          "export HOSTNAME=`/usr/bin/curl -s http://169.254.169.254/latest/meta-data/local-hostname`\n",
+
+          "# Bootstrap App Server\n",
+          "chef-client -c /opt/chef/client.rb -s 60\n",
+
+          "# Notify completion\n",
+          "touch /root/chef-complete"
         ]]}}
       }
     },
 
     "InnovateParticipants": {
-        "Type": "AWS::DynamoDB::Table",
-          "Properties": {
-            "KeySchema": {
-              "HashKeyElement": {
-                "AttributeName": "PhoneNumber",
-                "AttributeType": "S"
-              }
-            },
-            "ProvisionedThroughput": {
-              "ReadCapacityUnits": "1",
-              "WriteCapacityUnits": "1"
-            },
-            "TableName" : "InnovateParticipants"
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "KeySchema": {
+          "HashKeyElement": {
+            "AttributeName": "PhoneNumber",
+            "AttributeType": "S"
           }
+        },
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "1",
+          "WriteCapacityUnits": "1"
+        },
+        "TableName" : "InnovateParticipants"
+      }
     },
 
     "IvaAppDNS" : {
@@ -145,8 +170,8 @@
         "HostedZoneName" : { "Fn::Join" : ["", [{ "Ref" : "HostedZone" }, "."]]},
         "Name" : { "Fn::Join" : ["", [{ "Ref" : "HostedZone" }, "."]]},
         "ResourceRecords" : [
-            { "Fn::GetAtt" : [ "IvaAppInstance", "PublicIp" ] }
-         ],
+          { "Fn::GetAtt" : [ "IvaAppInstance", "PublicIp" ] }
+        ],
         "TTL" : "60",
         "Type" : "A"
       }
@@ -220,7 +245,7 @@
       "Description" : "This is the instance ID of the InnovateVA web server.",
       "Value" : {
         "Ref" : "IvaAppInstance"
-        }
+      }
     },
 
     "PublicIp" : {
