@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
-  
+
   "Description" : "This CloudFormation template describes the creation of the InnovateVA web server. SSH traffic will be allowed in through the bastion. Inbound HTTP(S) traffic will be limited to specific IPs.",
 
   "Parameters" : {
@@ -11,18 +11,24 @@
         "Default" : "ami-08842d60"
     },
 
+    "HostedZone" : {
+      "Description" : "This is the hosted zone you will connect jenkins to",
+      "Type" : "String",
+      "Default" : "singlestonedemo.com"
+    },
+
     "InstanceType" : {
         "Description" : "Enter m3.medium, m3.large, or m3.xlarge.  Default is m3.medium.",
         "Default" : "m3.medium",
         "Type" : "String",
         "AllowedValues" : [ "m3.medium","m3.large","m3.xlarge" ],
         "ConstraintDescription" : "Must be a valid EC2 instance type."
-    },     
+    },
 
     "IvaPublicSubnetId" : {
         "Description" : "This parameter will pull in the Public Subnet ID returned from vpc.template.",
         "Type" : "String"
-    },   
+    },
 
     "KeyName" : {
         "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
@@ -36,7 +42,7 @@
 
     "SourceSecurityGroupOwnerId" : {
         "Description" : "This parameter identifies the AWS account number under which all resources live.",
-        "Default" : "592342700041",     
+        "Default" : "592342700041",
         "Type" : "String"
     },
 
@@ -65,9 +71,9 @@
       "Type" : "AWS::EC2::Instance",
         "Properties" : {
         "DisableApiTermination" : "FALSE",
-        "ImageId" : { 
-          "Ref" : "AMI" 
-        },      
+        "ImageId" : {
+          "Ref" : "AMI"
+        },
         "InstanceType" : {
           "Ref" : "InstanceType"
         },
@@ -136,8 +142,8 @@
       "Type" : "AWS::Route53::RecordSet",
       "Properties" : {
         "Comment" : "Sets hostname for IvaApp.",
-        "HostedZoneName" : "singlestonedemo.com.",
-        "Name" : "singlestonedemo.com.",
+        "HostedZoneName" : { "Fn::Join" : ["", [{ "Ref" : "HostedZone" }, "."]]},
+        "Name" : { "Fn::Join" : ["", [{ "Ref" : "HostedZone" }, "."]]},
         "ResourceRecords" : [
             { "Fn::GetAtt" : [ "IvaAppInstance", "PublicIp" ] }
          ],
@@ -212,7 +218,7 @@
   "Outputs" : {
     "InstanceId" : {
       "Description" : "This is the instance ID of the InnovateVA web server.",
-      "Value" : { 
+      "Value" : {
         "Ref" : "IvaAppInstance"
         }
     },

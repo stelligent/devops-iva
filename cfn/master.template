@@ -1,36 +1,53 @@
 {
-   "AWSTemplateFormatVersion" : "2010-09-09",
+  "AWSTemplateFormatVersion" : "2010-09-09",
 
   "Description" : "This CloudFormation Master template is responsible for intelligently standing up AWS resources such that dependencies are met.  It will call additional CloudFormation templates to build the VPC, bastion instance, NAT instance, CI instance, PAT instance, and necessary OpsWorks infrastructure.  A CloudFormation template for each AWS resource should be listed with the AWS::CloudFormation::Stack resource type.",
-
+  "Parameters" : {
+    "HostedZone" : {
+      "Description" : "This is the hosted zone you will connect jenkins to",
+      "Type" : "String",
+      "Default" : "singlestonedemo.com"
+    },
+    "S3Bucket" : {
+      "Description" : "This is the s3 bucket where your cfn templates are stored",
+      "Type" : "String",
+      "Default" : "singlestonedemo"
+    },
+     "KeyName" : {
+        "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+        "Default" : "innovate",
+        "Type" : "String",
+        "MinLength" : "1",
+        "MaxLength" : "255",
+        "AllowedPattern" : "[\\x20-\\x7E]*",
+        "ConstraintDescription" : "can contain only ASCII characters."
+    }
+  },
   "Resources" : {
 
     "IvaVpcStack" : {
       "Type" : "AWS::CloudFormation::Stack",
       "Properties" : {
-          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/vpc.template",
-          "Parameters" : {
-            },
-          "TimeoutInMinutes" : "600"
-        }
-      },
-      
+        "TemplateURL" : { "Fn::Join" : [ "", [ "https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/cfn/vpc.template" ]]},
+        "Parameters" : {
+        },
+        "TimeoutInMinutes" : "600"
+      }
+    },
+
     "IvaJenkinsStack" : {
       "Type" : "AWS::CloudFormation::Stack",
       "DependsOn" : "IvaVpcStack",
       "Properties" : {
-          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/jenkins.template",
-          "Parameters" : {
-              "InstanceType" : "m3.medium",
-              "KeyName" : "innovate",
-              "VpcId" : { 
-                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]
-              },
-              "IvaPublicSubnetId" : {
-                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]
-              }
-          },
-          "TimeoutInMinutes" : "600"
+        "TemplateURL" : { "Fn::Join" : [ "", [ "https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/cfn/jenkins.template" ]]},
+        "Parameters" : {
+          "InstanceType" : "m3.medium",
+          "KeyName" : { "Ref" : "KeyName" },
+          "HostedZone" : { "Ref" : "HostedZone" },
+          "VpcId" : { "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]},
+          "IvaPublicSubnetId" : { "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]}
+        },
+        "TimeoutInMinutes" : "600"
       }
     },
 
@@ -38,19 +55,16 @@
       "Type" : "AWS::CloudFormation::Stack",
       "Description" : "Brings up an Amazon Linux application server with Apache and Tomcat.",
       "Properties" : {
-          "TemplateURL" : "https://s3.amazonaws.com/singlestone/cfn/web.template",
-          "Parameters" : {
-              "InstanceType" : "m3.medium",
-              "KeyName" : "innovate",
-              "VpcId" : { 
-                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]
-              },
-              "IvaPublicSubnetId" : {
-                "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]
-              }
-          },
-          "TimeoutInMinutes" : "600"
+        "TemplateURL" : { "Fn::Join" : [ "", [ "https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/cfn/web.template" ]]},
+        "Parameters" : {
+          "InstanceType" : "m3.medium",
+          "KeyName" : { "Ref" : "KeyName" },
+          "HostedZone" : { "Ref" : "HostedZone" },
+          "VpcId" : { "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.VpcId" ]},
+          "IvaPublicSubnetId" : { "Fn::GetAtt" : [ "IvaVpcStack", "Outputs.IvaPublicSubnetId" ]}
+        },
+        "TimeoutInMinutes" : "600"
       }
     }
-  }   
+  }
 }
