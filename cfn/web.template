@@ -72,10 +72,55 @@
   },
 
   "Resources" : {
+
+    "RootRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version" : "2012-10-17",
+          "Statement": [ {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [ "ec2.amazonaws.com" ]
+            },
+            "Action": [ "sts:AssumeRole" ]
+          } ]
+        },
+        "Path": "/"
+      }
+    },
+    "RolePolicies": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "root",
+        "PolicyDocument": {
+          "Version" : "2012-10-17",
+          "Statement": [ {
+            "Effect": "Allow",
+            "Action": "*",
+            "Resource": "*"
+          } ]
+        },
+        "Roles": [ {
+          "Ref": "RootRole"
+        } ]
+      }
+    },
+    "RootInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [ {
+          "Ref": "RootRole"
+        } ]
+      }
+    },
+
     "IvaAppInstance" : {
       "Type" : "AWS::EC2::Instance",
       "Properties" : {
         "DisableApiTermination" : "FALSE",
+        "IamInstanceProfile": { "Ref" : "RootInstanceProfile" },
         "ImageId" :  { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
                                           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
        "InstanceType" : { "Ref" : "InstanceType" },
@@ -113,7 +158,7 @@
             "AssociatePublicIpAddress" : "true"
           }
         ],
-        "Userdata" : { "Fn::Base64" : { "Fn::Join" : ["", [
+        "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
           "#!/bin/bash -v\n",
           "# Make directories\n",
           "mkdir /var/log/newrelic\n",
