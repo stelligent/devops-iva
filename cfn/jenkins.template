@@ -122,7 +122,7 @@
           "mkdir /var/log/newrelic\n",
           "mkdir -p /opt/chef\n",
 
-          "wget -O /tmp/chef-client.rpm       https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/chefdk-0.3.0-1.x86_64.rpm\n",
+          "wget -O /tmp/chef-client.rpm       https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/binaries/chefdk-0.3.0-1.x86_64.rpm\n",
           "rpm -Uvh /tmp/chef-client.rpm\n",
 
           "wget -O /opt/chef/client.rb        https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/jenkinsclient.rb\n",
