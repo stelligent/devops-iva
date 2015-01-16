@@ -119,18 +119,31 @@
           "bash /tmp/hostname.sh\n",
           "hostname InnovateVaJenkins\n",
 
+          "mkdir /root/.chef\n",
+          "mkdir /etc/.chef\n",
           "mkdir /var/log/newrelic\n",
           "mkdir -p /opt/chef\n",
+          "mkdir /tmp\n",
+          "mkdir -p /var/lib/jenkins/.ssh\n",
+
+          "wget -O /root/.chef/knife.rb       https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "chef/jenkinsknife.rb\n",
 
           "wget -O /tmp/chef-client.rpm       https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/binaries/chefdk-0.3.0-1.x86_64.rpm\n",
           "rpm -Uvh /tmp/chef-client.rpm\n",
 
           "wget -O /opt/chef/client.rb        https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/jenkinsclient.rb\n",
+
+          "wget -O /etc/.chef/client.pem      https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/jenkins.pem\n",
+
           "wget -O /opt/chef/validator.pem    https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/validator.pem\n",
+
           "wget -O /opt/chef/node.json        https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/cinode.json\n",
+
+          "wget -O /var/lib/jenkins/.ssh/innovate.pem   https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/innovate.pem\n",
+
           "export HOSTNAME=`/usr/bin/curl -s http://169.254.169.254/latest/meta-data/local-hostname`\n",
 
-          "chef-client -c /opt/chef/client.rb\n",
+          "chef-client -c /opt/chef/client.rb -s 60\n",
           "touch /root/chef-complete"
         ]]}}
       }
