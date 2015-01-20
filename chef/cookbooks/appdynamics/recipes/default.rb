@@ -17,6 +17,7 @@ end
 execute "unzip JavaAgent" do
 	cwd '/opt/appdynamics/'
 	command "unzip Agent.zip"
+    not_if { File.exists?('/opt/appdynamics/javaagent.jar') }
 end
 
 directory "/opt/appdynamics/logs/tomcatinstance" do
