@@ -1,4 +1,3 @@
-[root@InnovateVaApp init.d]# cat tomcat7
 #!/bin/bash
 #
 # tomcat      This shell script takes care of starting and stopping Tomcat
@@ -22,7 +21,8 @@
 ## Source function library.
 . /etc/rc.d/init.d/functions
 
-java -javaagent:/opt/appdynamics/javaagent.jar
+## Commented out below to remove AppDynamics dependency
+#java -javaagent:/opt/appdynamics/javaagent.jar
 
 NAME="$(basename $0)"
 
