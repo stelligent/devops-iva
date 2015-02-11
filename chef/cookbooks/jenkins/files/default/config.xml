@@ -57,7 +57,7 @@
   <prebuilders/>
   <postbuilders>
     <hudson.tasks.Shell>
-      <command>scp -i /var/lib/jenkins/.ssh/innovate.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null app/target/devops-iva-1.0.0-SNAPSHOT.war ec2-user@singlestonedemo.com:/usr/share/tomcat7/webapps/ROOT.war</command>
+      <command>scp -i /var/lib/jenkins/.ssh/innovate.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null app/target/devops-iva-1.0.0-SNAPSHOT.war ec2-user@elasticoperations.com:/usr/share/tomcat7/webapps/ROOT.war</command>
     </hudson.tasks.Shell>
   </postbuilders>
   <runPostStepsIfResult>

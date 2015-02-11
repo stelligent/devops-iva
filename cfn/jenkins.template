@@ -116,13 +116,59 @@
       }
     },
 
+    "User" : {
+      "Type" : "AWS::IAM::User",
+      "Properties" : {
+        "Path": "/",
+        "Policies": [{
+          "PolicyName": "root",
+          "PolicyDocument": {
+            "Statement":[{
+              "Effect":"Allow",
+              "Action":"*",
+              "Resource":"*"
+            }]
+          }
+        }]
+      }
+    },
+    "HostKeys" : {
+      "Type" : "AWS::IAM::AccessKey",
+      "Properties" : {
+        "UserName" : { "Ref" : "User" }
+      }
+    },
+
     "IvaJenkins" : {
       "Type" : "AWS::EC2::Instance",
+      "Metadata" : {
+        "AWS::CloudFormation::Init" : {
+          "config" : {
+            "files" : {
+              "/var/lib/jenkins/.ssh/innovate.pem" : {
+                "source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/", { "Ref" : "KeyName" } ]]},
+                "mode" : "000600",
+                "owner" : "ec2-user",
+                "group" : "ec2-user",
+                "authentication" : "S3AccessCreds"
+              }
+            }
+          }
+        },
+        "AWS::CloudFormation::Authentication" : {
+          "S3AccessCreds" : {
+            "type" : "S3",
+            "accessKeyId" : { "Ref" : "HostKeys" },
+            "secretKey" : {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
+            "buckets" : [ { "Ref" : "S3Bucket" } ]
+          }
+        }
+      },
       "Properties" : {
         "DisableApiTermination" : "FALSE",
         "IamInstanceProfile": { "Ref" : "RootInstanceProfile" },
         "ImageId" :  { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
-                                          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
+                                           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
         "InstanceType" : { "Ref" : "InstanceType" },
         "KeyName" : { "Ref" : "KeyName" },
         "Monitoring" : "true",
@@ -160,6 +206,7 @@
         ],
         "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
           "#!/bin/bash -v\n",
+
           "wget -O /tmp/hostname.sh           https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/hostname.sh\n",
           "bash /tmp/hostname.sh\n",
           "hostname InnovateVaJenkins\n",
@@ -174,6 +221,7 @@
           "wget -O /root/.chef/knife.rb       https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "chef/jenkinsknife.rb\n",
 
           "wget -O /tmp/chef-client.rpm       https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/binaries/chefdk-0.3.0-1.x86_64.rpm\n",
+
           "rpm -Uvh /tmp/chef-client.rpm\n",
 
           "wget -O /opt/chef/client.rb        https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/jenkinsclient.rb\n",
@@ -184,7 +232,13 @@
 
           "wget -O /opt/chef/node.json        https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/cinode.json\n",
 
-          "wget -O /var/lib/jenkins/.ssh/innovate.pem   https://s3.amazonaws.com/", { "Ref" : "S3Bucket" }, "/chef/innovate.pem\n",
+          "yum update -y aws-cfn-bootstrap\n",
+
+          "# Install Packages\n",
+          "/opt/aws/bin/cfn-init -v -s ", { "Ref" : "AWS::StackName" }, " -r IvaJenkins ",
+          " --access-key ", { "Ref" : "HostKeys" },
+          " --secret-key ", { "Fn::GetAtt" : [ "HostKeys", "SecretAccessKey" ]},
+          " --region ", { "Ref" : "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
 
           "export HOSTNAME=`/usr/bin/curl -s http://169.254.169.254/latest/meta-data/local-hostname`\n",
 
